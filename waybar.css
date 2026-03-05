@@ -17,7 +17,7 @@
   border-radius: 0;
   box-shadow: none;
   font-family: Iosevka;
-  font-size: 11pt;
+  font-size: 9pt;
   min-height: 0;
 }
 
@@ -47,6 +47,6 @@ window#waybar {
 }
 
 #clock {
-  padding: 0 4px;
+  padding: 0 1px;
   background: @background;
 }
