@@ -2,7 +2,7 @@
 @define-color selected-text #56b6c2;
 @define-color text #5c6370;
 @define-color base #282c34;
-@define-color border #61afef;
+@define-color border #4b5260;
 @define-color foreground #abb2bf;
 @define-color background #3e4451;
 @define-color input #3e4451;
@@ -27,10 +27,10 @@ window {
 
 window .box-wrapper {
   border-radius: 0;
-  border: 2px solid @border;
+  border: 1px solid @border;
   padding: 18px 22px;
-  background: transparent;
-  background-color: transparent;
+  background: @base;
+  background-color: @base;
 }
 
 window .search-container {
