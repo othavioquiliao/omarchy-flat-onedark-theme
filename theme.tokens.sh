@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Single source of truth for this theme.
+
+THEME_NAME="One Dark Pro Flat"
+
+BACKGROUND="#282c34"
+SURFACE="#21252b"
+OVERLAY="#2c313a"
+SELECTION="#3e4451"
+FOREGROUND="#abb2bf"
+COMMENT="#5c6370"
+SUBTLE="#9aa2ad"
+
+RED="#e06c75"
+GREEN="#98c379"
+YELLOW="#e5c07b"
+BLUE="#61afef"
+MAGENTA="#c678dd"
+CYAN="#56b6c2"
+ORANGE="#d19a66"
+
+BRIGHT_RED="#be5046"
+BRIGHT_GREEN="#7da869"
+BRIGHT_YELLOW="#d19a66"
+BRIGHT_BLUE="#528bff"
+BRIGHT_MAGENTA="#d070ff"
+BRIGHT_CYAN="#4aa5b7"
+BRIGHT_WHITE="#c8ccd4"
+
+# Fully solid windows everywhere.
+WINDOW_OPACITY="1.0"
+TERMINAL_BACKGROUND_OPACITY="1.0"
