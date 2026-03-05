@@ -10,7 +10,7 @@
 @define-color selected-border #5c6370;
 
 window {
-  background-color: @base;
+  background-color: transparent;
   border: none;
   border-width: 0;
   border-color: @border;
@@ -29,7 +29,13 @@ window .box-wrapper {
   border-radius: 0;
   border: 2px solid @border;
   padding: 18px 22px;
-  background: @base;
+  background: transparent;
+  background-color: transparent;
+}
+
+window .search-container {
+  background: @background;
+  background-color: @background;
 }
 
 #entry entry,

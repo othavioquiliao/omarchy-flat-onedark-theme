@@ -588,7 +588,7 @@ cat > "${ROOT_DIR}/walker.css" <<TOKENS
 @define-color selected-border ${COMMENT};
 
 window {
-  background-color: @base;
+  background-color: transparent;
   border: none;
   border-width: 0;
   border-color: @border;
@@ -607,7 +607,13 @@ window .box-wrapper {
   border-radius: 0;
   border: 2px solid @border;
   padding: 18px 22px;
-  background: @base;
+  background: transparent;
+  background-color: transparent;
+}
+
+window .search-container {
+  background: @background;
+  background-color: @background;
 }
 
 #entry entry,
@@ -954,8 +960,14 @@ decoration {
 }
 
 windowrule {
+  name = windowrule-clear-default-opacity
+  tag = -default-opacity
+  match:class = .*
+}
+
+windowrule {
   name = windowrule-1
-  opacity = ${WINDOW_OPACITY} ${WINDOW_OPACITY} # Window opacity control: keep both values at 1.0 for solid windows.
+  opacity = ${WINDOW_OPACITY} override ${WINDOW_OPACITY} override # Window opacity control: force active/inactive windows fully opaque.
   match:class = .*
 }
 
