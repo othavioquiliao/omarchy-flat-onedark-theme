@@ -1,16 +1,18 @@
 # Omarchy Flat OneDark Theme
 
-Stock-safe Omarchy theme with a flat One Dark identity, rebuilt around semantic tokens, a cleaner Waybar/Walker surface, and a richer two-line prompt.
+Stock-safe Omarchy theme with a flat One Dark identity, rebuilt around semantic tokens, a stock-first Waybar, a cleaner Walker surface, and a richer two-line prompt.
 
 ![Omarchy Flat OneDark Theme preview](preview.png)
 
 ## What's included
 - Semantic tokens in `theme.tokens.sh`
-- Generated theme artifacts for Omarchy, Waybar, Walker and terminal colors
+- Generated repo-owned artifacts for Walker, Hyprland and app integrations, with a stock-first Waybar color layer
+- Template-driven colors for terminal, Hyprlock, SwayOSD, btop, browser policy and other Omarchy surfaces via `colors.toml`
 - Stock-aligned Waybar layout in `waybar-theme/config.jsonc`
 - Future-facing `qbar.css` contract file for qbar to consume later
 - Segmented `starship.toml` with smart path truncation and Python env visibility
 - `scripts/apply-theme.sh` to sync this project into Omarchy and apply it safely
+- `scripts/audit-theme.sh` to detect files that accidentally shadow Omarchy templates
 
 ## Theme Editing (Single Source of Truth)
 
@@ -26,7 +28,15 @@ Then regenerate every theme file:
 ./scripts/build-theme.sh
 ```
 
-This rewrites the generated theme files from one palette and one density/typography layer.
+This rewrites the generated repo-owned files from one palette and one density/typography layer.
+
+Run the audit whenever you change file ownership across the theme:
+
+```bash
+./scripts/audit-theme.sh
+```
+
+If the audit fails, the repo is shadowing an Omarchy template that should probably be generated from `colors.toml` instead.
 
 ## Apply To Omarchy
 
@@ -49,6 +59,8 @@ The apply script:
 - applies the theme with `omarchy-theme-set flat-onedark`;
 - restarts Walker after theme application so the launcher picks up the new CSS.
 
+The repo remains the source of truth. `theme-manager` can still be useful for inspection, but this theme should not require a post-apply repair step through `theme-manager`.
+
 ## Tool Color Map (Quick)
 
 | Tool | Runtime path used by Omarchy | File in this theme repo | Apply/Reload |
@@ -58,17 +70,17 @@ The apply script:
 | qbar theme contract | `~/.config/omarchy/current/theme/qbar.css` | `qbar.css` | qbar-side integration only |
 | Walker | `~/.local/share/omarchy/default/walker/themes/omarchy-default/style.css` imports `~/.config/omarchy/current/theme/walker.css` | `walker.css` | `omarchy-restart-walker` |
 | Hyprland look | `~/.config/hypr/hyprland.conf` sources `~/.config/omarchy/current/theme/hyprland.conf` | `hyprland.conf` | `hyprctl reload` |
-| Hyprlock | `~/.config/hypr/hyprlock.conf` sources `~/.config/omarchy/current/theme/hyprlock.conf` | `hyprlock.conf` | `hyprctl reload` |
+| Hyprlock | `~/.config/hypr/hyprlock.conf` sources `~/.config/omarchy/current/theme/hyprlock.conf` | generated from `colors.toml` templates | `hyprctl reload` |
 | Mako | `~/.config/mako/config` symlink to `~/.config/omarchy/current/theme/mako.ini` | generated from `colors.toml` templates | `omarchy-restart-mako` |
-| SwayOSD | `~/.config/swayosd/style.css` imports `~/.config/omarchy/current/theme/swayosd.css` | `swayosd.css` | `omarchy-restart-swayosd` |
-| Alacritty | `~/.config/alacritty/alacritty.toml` imports current theme | `alacritty.toml` | `omarchy-restart-terminal` |
-| Kitty | `~/.config/kitty/kitty.conf` includes current theme | `kitty.conf` | `omarchy-restart-terminal` |
-| Ghostty | `~/.config/ghostty/config` loads current theme | `ghostty.conf` | `omarchy-restart-terminal` |
+| SwayOSD | `~/.config/swayosd/style.css` imports `~/.config/omarchy/current/theme/swayosd.css` | generated from `colors.toml` templates | `omarchy-restart-swayosd` |
+| Alacritty | `~/.config/alacritty/alacritty.toml` imports current theme | generated from `colors.toml` templates | `omarchy-restart-terminal` |
+| Kitty | `~/.config/kitty/kitty.conf` includes current theme | generated from `colors.toml` templates | `omarchy-restart-terminal` |
+| Ghostty | `~/.config/ghostty/config` loads current theme | generated from `colors.toml` templates | `omarchy-restart-terminal` |
 | Browser color policy | `omarchy-theme-set-browser` reads `~/.config/omarchy/current/theme/chromium.theme` | generated from `colors.toml` templates | `omarchy-theme-set` |
 | VSCode/Codium/Cursor theme | `omarchy-theme-set-vscode` reads `~/.config/omarchy/current/theme/vscode.json` | `vscode.json` | `omarchy-theme-set` |
 | Obsidian theme sync | `omarchy-theme-set-obsidian` copies `~/.config/omarchy/current/theme/obsidian.css` to vaults | generated from `colors.toml` templates | `omarchy-theme-set` |
 | Keyboard RGB | `omarchy-theme-set-keyboard-*` reads `~/.config/omarchy/current/theme/keyboard.rgb` | generated from `colors.toml` templates | `omarchy-theme-set` |
-| btop | `~/.config/btop/themes/current.theme` symlink to current theme | `btop.theme` | `omarchy-restart-btop` |
+| btop | `~/.config/btop/themes/current.theme` symlink to current theme | generated from `colors.toml` templates | `omarchy-restart-btop` |
 | Neovim | `~/.config/nvim/lua/plugins/theme.lua` symlink to current theme | `neovim.lua` | Restart nvim |
 | Starship prompt | `~/.config/starship.toml` | `starship.toml` | new shell |
 
@@ -87,6 +99,11 @@ qbar setup
 ```
 
 This theme now only publishes `qbar.css` as a future-facing visual contract. It does not copy qbar icons, inject qbar modules, or style qbar providers inside the main Waybar apply flow.
+
+Waybar itself is now intentionally minimal:
+- stock Omarchy layout;
+- stock Omarchy wrapper CSS;
+- theme-owned `waybar.css` reduced to foreground/background only.
 
 To return to Omarchy defaults outside this repo:
 
@@ -117,6 +134,20 @@ omarchy-theme-set flat-onedark
 For full mapping, template flow, troubleshooting, and reset commands, see:
 
 - `docs/theme-color-map.md`
+
+## Practical Theme Policy
+
+This repo uses a hybrid model on purpose:
+
+- `colors.toml` owns surfaces where Omarchy already provides good templates and the main risk is palette drift.
+- Direct repo files own surfaces where this theme needs layout or interaction control beyond the stock templates.
+
+That split matters for UX:
+
+- `wifi`, `bluetooth`, `audio` and `processes` launched from Waybar are terminal TUIs, so their readability is driven mostly by terminal ANSI colors.
+- `power`, setup menus and Omarchy action menus go through Walker, so those are controlled by `walker.css`.
+
+If a surface looks wrong after apply, first check whether it should be template-driven or repo-owned before adding more hardcoded overrides.
 
 ## Backgrounds
 This theme ships with the One Dark backgrounds:

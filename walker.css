@@ -10,7 +10,7 @@
 @define-color background #161a20;
 @define-color input #242a33;
 @define-color hover-box #242a33;
-@define-color selected-box #323b48;
+@define-color selected-box #2b3d50;
 
 window {
   background-color: transparent;

@@ -2,28 +2,28 @@
 @import "../omarchy/current/theme/waybar.css";
 
 .modules-left {
-  margin-left: 10px;
+  margin-left: 8px;
 }
 
 .modules-right {
-  margin-right: 10px;
+  margin-right: 8px;
 }
 
 #custom-update {
-  margin-left: 6px;
+  margin-left: 4px;
 }
 
 #custom-voxtype,
 #custom-screenrecording-indicator,
 #custom-idle-indicator,
 #custom-notification-silencing-indicator {
-  margin-left: 4px;
+  margin-left: 2px;
 }
 
 #custom-expand-icon {
-  margin-right: 2px;
+  margin-right: 0;
 }
 
 #tray {
-  margin-right: 8px;
+  margin-right: 4px;
 }
