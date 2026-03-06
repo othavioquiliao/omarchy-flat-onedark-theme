@@ -26,6 +26,11 @@
 @define-color accent_power #98c379;
 @define-color alert_bg #e06c75;
 @define-color alert_text #282c34;
+@define-color state_ok #98c379;
+@define-color state_info #56b6c2;
+@define-color state_warning #e5c07b;
+@define-color state_muted #9aa2ad;
+@define-color state_alert #e06c75;
 @define-color item_hover_bg #3e4451;
 
 * {
@@ -256,6 +261,30 @@ tooltip label {
 #bluetooth {
   background-color: @neutral_bg;
   color: @accent_cool;
+}
+
+/* Dynamic state colors (One Dark semantic mapping) */
+#network.disconnected,
+#network.disabled {
+  color: @state_warning;
+}
+
+#bluetooth.off,
+#bluetooth.disabled,
+#bluetooth.no-controller {
+  color: @state_muted;
+}
+
+#bluetooth.connected {
+  color: @state_ok;
+}
+
+#pulseaudio.muted {
+  color: @state_muted;
+}
+
+#battery.charging {
+  color: @state_ok;
 }
 
 #mpris {
