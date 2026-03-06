@@ -7,10 +7,10 @@ return {
       require("onedarkpro").setup({
         theme = "onedark",
         highlights = {
-          LineNr = { fg = "#5c6370", bg = "bg" },
+          LineNr = { fg = "#6a7485", bg = "bg" },
           TabLineFill = { bg = "bg" },
           TabLine = { bg = "bg" },
-          TabLineSel = { bg = "#282c34" },
+          TabLineSel = { bg = "#1f2329" },
         },
       })
       vim.cmd("colorscheme onedark")

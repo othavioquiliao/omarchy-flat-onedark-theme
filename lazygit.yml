@@ -9,13 +9,13 @@ theme:
     - "#56b6c2"
     - bold
   optionsTextColor:
-    - "#5c6370"
+    - "#6a7485"
   selectedLineBgColor:
-    - "#5c6370"
+    - "#6a7485"
   inactiveViewSelectedLineBgColor:
     - bold
   cherryPickedCommitFgColor:
-    - "#5c6370"
+    - "#6a7485"
   cherryPickedCommitBgColor:
     - "#56b6c2"
   markedBaseCommitFgColor:
@@ -25,4 +25,4 @@ theme:
   unstagedChangesColor:
     - "#e06c75"
   defaultFgColor:
-    - "#abb2bf"
+    - "#c0c9d4"
