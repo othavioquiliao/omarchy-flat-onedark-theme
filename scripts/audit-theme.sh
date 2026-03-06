@@ -25,8 +25,6 @@ repo_owned=(
   "lazygit.yml"
   "cava_theme"
   "starship.toml"
-  "waybar-theme/config.jsonc"
-  "waybar-theme/style.css"
 )
 
 is_repo_owned() {
@@ -74,6 +72,33 @@ printf '  - mako.ini\n'
 printf '  - chromium.theme\n'
 printf '  - obsidian.css\n'
 printf '  - keyboard.rgb\n'
+
+printf '\nWaybar ownership checks:\n'
+if [[ -e "${ROOT_DIR}/waybar-theme/config.jsonc" ]] || [[ -e "${ROOT_DIR}/waybar-theme/style.css" ]]; then
+  printf '  - invalid: legacy waybar-theme layout files still exist in the repo\n' >&2
+  exit 3
+fi
+printf '  - repo does not publish legacy waybar-theme layout files\n'
+
+if [[ ! -x "${ROOT_DIR}/scripts/repair-waybar.sh" ]]; then
+  printf '  - invalid: scripts/repair-waybar.sh is missing or not executable\n' >&2
+  exit 3
+fi
+printf '  - repair script exists and is executable\n'
+
+if ! rg -n 'repair-waybar\.sh' "${ROOT_DIR}/scripts/apply-theme.sh" >/dev/null; then
+  printf '  - invalid: scripts/apply-theme.sh no longer delegates to scripts/repair-waybar.sh\n' >&2
+  exit 3
+fi
+printf '  - apply script delegates to repair-waybar.sh\n'
+
+if rg -n '~/.local/share/omarchy/config/waybar|omarchy-refresh-waybar' \
+  "${ROOT_DIR}/scripts/apply-theme.sh" \
+  "${ROOT_DIR}/scripts/repair-waybar.sh" >/dev/null; then
+  printf '  - invalid: Waybar scripts still mutate or refresh the contaminated Omarchy Waybar source\n' >&2
+  exit 3
+fi
+printf '  - Waybar scripts repair only ~/.config/waybar from Omarchy git HEAD\n'
 
 if [[ "${shadow_count}" -ne 0 ]]; then
   printf '\nAudit failed: remove unintended shadowing files or declare them repo-owned.\n' >&2
