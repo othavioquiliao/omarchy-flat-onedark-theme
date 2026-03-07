@@ -1,202 +1,182 @@
 # Build and Apply
 
-## Overview
+## Public Commands
 
-This theme exposes four operational commands:
+This theme exposes these operator-facing commands:
 
 - `./scripts/build-theme.sh`
 - `./scripts/audit-theme.sh`
 - `./scripts/repair-waybar.sh`
 - `./scripts/apply-theme.sh`
+- `./scripts/enable-qbar-safe.sh`
+- `./scripts/disable-qbar-safe.sh`
 
-They serve different purposes and should not be conflated.
+It also exposes one internal helper:
+
+- `./scripts/apply-qbar-overlay.sh`
 
 ## `scripts/build-theme.sh`
 
-### Responsibility
+Use this after changing `theme.tokens.sh` or generator logic.
 
-Generate repo-owned theme artifacts from `theme.tokens.sh`.
-
-### Input
-
-- `theme.tokens.sh`
-
-### Primary outputs
+It regenerates repo-owned outputs such as:
 
 - `colors.toml`
-- `colors.fish`
-- `fzf.fish`
 - `waybar.css`
+- `qbar.css`
 - `walker.css`
 - `gtk.css`
 - `hyprland.conf`
 - `starship.toml`
-- `qbar.css`
-- `steam.css`
-- `vencord.theme.css`
-- `neovim.lua`
-- `cava_theme`
-- `lazygit.yml`
 
-### What it does not do
-
-- it does not apply the theme
-- it does not restart services
-- it does not write to `~/.config`
-- it does not repair Waybar live state
-
-### When to run it
-
-- after changing `theme.tokens.sh`
-- after changing generator logic
-- before committing generated outputs
+It does not apply the theme, restart services, or repair Waybar.
 
 ## `scripts/audit-theme.sh`
 
-### Responsibility
+Use this after ownership or structural changes.
 
-Enforce anti-drift and ownership rules.
+It checks:
 
-### Current checks
-
-- template-shadowing files in the repo root
-- presence of forbidden legacy Waybar layout files
-- presence and executability of `scripts/repair-waybar.sh`
-- confirmation that `scripts/apply-theme.sh` delegates Waybar repair
-- confirmation that Waybar scripts do not fall back to `omarchy-refresh-waybar`
-- confirmation that Waybar scripts do not mutate the contaminated Omarchy source Waybar path
-
-### When to run it
-
-- after ownership changes
-- after refactors of `apply-theme.sh`, `repair-waybar.sh`, or `build-theme.sh`
-- before merging structural changes
+- template-shadowing drift
+- forbidden legacy Waybar layout files
+- repair/apply script wiring
+- that this repo does not mutate `~/.local/share/omarchy`
 
 ## `scripts/repair-waybar.sh`
 
-### Responsibility
+Use this when the live bar needs to return to a stock-safe baseline.
 
-Repair the live Waybar base without touching the Omarchy source tree.
+It:
 
-### Why it exists
+1. reads Omarchy git `HEAD`
+2. rebuilds `~/.config/waybar/themes/omarchy-default/`
+3. rewrites live `config.jsonc` and `style.css` as plain files from that repaired snapshot
+4. optionally restarts Waybar
 
-On this machine, `~/.local/share/omarchy/config/waybar/*` is dirty in the Omarchy working tree. Traditional “reset to default” flows can therefore reproduce a broken default.
-
-This script breaks that dependency by rebuilding the local stock base from Omarchy git `HEAD`.
-
-### Behavior
-
-1. verifies that `~/.local/share/omarchy` is a git repo
-2. checks whether the Omarchy Waybar source files are dirty
-3. warns if they are dirty
-4. creates or normalizes `~/.config/waybar/themes/omarchy-default`
-5. writes `config.jsonc` from `git show HEAD:config/waybar/config.jsonc`
-6. writes `style.css` from `git show HEAD:config/waybar/style.css`
-7. repoints:
-   - `~/.config/waybar/config.jsonc`
-   - `~/.config/waybar/style.css`
-8. optionally restarts Waybar
-
-### Flags
+Flags:
 
 - `--dry-run`
-  - prints commands instead of mutating local state
 - `--no-restart`
-  - performs the repair but skips the Waybar restart
 
-### What it does not do
-
-- does not mutate `~/.local/share/omarchy`
-- does not apply the theme
-- does not restart Walker
-- does not touch qbar setup
+It does not apply the theme and does not enable qbar.
 
 ## `scripts/apply-theme.sh`
 
-### Responsibility
+Use this for the full theme apply path.
 
-Apply the theme end to end.
+Sequence:
 
-### Sequence
+1. rebuild generated artifacts
+2. sync the repo into `~/.config/omarchy/themes/flat-onedark`
+3. sync `starship.toml`
+4. repair the Waybar base through `./scripts/repair-waybar.sh --no-restart`
+5. run `omarchy-theme-set flat-onedark`
+6. optionally re-apply the qbar overlay
+7. restart Waybar and Walker
 
-1. optional backup cleanup
-2. build generated artifacts
-3. sync repo into `~/.config/omarchy/themes/flat-onedark`
-4. sync `starship.toml`
-5. repair local Waybar base through `scripts/repair-waybar.sh --no-restart`
-6. call `omarchy-theme-set flat-onedark`
-7. restart Waybar
-8. restart Walker
-
-### Why apply still repairs Waybar
-
-Because repairing Waybar is part of making the theme deterministic on this system. Applying the theme without repairing Waybar would leave a known source of drift alive.
-
-### Flags
+Flags:
 
 - `--dry-run`
-  - shows what would happen without changing `~/.config`
 - `--with-backups`
-  - creates `.bak.<timestamp>` snapshots before overwriting targeted files and directories
 - `--clean-backups`
-  - removes backup files created by this repository's workflows
+- `--with-qbar`
+- `--without-qbar`
 
-### Backup policy
+Use `--with-qbar` when you want theme apply to force the optional overlay on. Use `--without-qbar` when you want apply to clear the persisted overlay state and leave the bar stock-safe.
 
-Backups are disabled by default.
+If the overlay state file already exists and is enabled, `apply-theme.sh` re-applies the overlay automatically after `omarchy-theme-set`.
 
-This is intentional:
+## `scripts/enable-qbar-safe.sh`
 
-- automatic backups created too much noise
-- stale Waybar backups were part of the confusion during the repair work
-- `--with-backups` remains available when a manual rollback trail is needed
+Use this when the theme is already installed and you want to turn the qbar overlay on without a full theme apply.
 
-### Cleanup policy
+It:
 
-`--clean-backups` removes backup patterns generated by this repository, including:
+1. repairs the live Waybar base
+2. delegates to the internal overlay helper
+3. leaves the repaired stock snapshot unchanged
 
-- theme directory backups
-- `starship.toml` backups
-- historical Waybar backup patterns created during earlier iterations
+Flags:
+
+- `--no-restart`
+
+## `scripts/disable-qbar-safe.sh`
+
+Use this when you want to restore the stock-safe bar without removing qbar itself.
+
+It:
+
+1. repairs the live Waybar base
+2. removes `~/.config/waybar/.flat-onedark-qbar-overlay.json`
+3. optionally removes qbar-owned Waybar assets
+
+Flags:
+
+- `--no-restart`
+- `--purge-assets`
+
+`--purge-assets` removes:
+
+- `~/.config/waybar/qbar`
+- `~/.config/waybar/scripts/qbar-open-terminal`
+
+## `scripts/apply-qbar-overlay.sh`
+
+This is an internal helper, not the preferred user entrypoint.
+
+It composes the optional qbar overlay on top of the already-repaired live Waybar files by:
+
+1. optionally running repair first with `--repair`
+2. calling `qbar assets install`
+3. reading `qbar export waybar-modules`
+4. reading `qbar export waybar-css`
+5. rewriting only the live `config.jsonc` and `style.css`
+6. writing `~/.config/waybar/.flat-onedark-qbar-overlay.json`
+
+Flags:
+
+- `--repair`
+- `--no-restart`
 
 ## Typical Workflows
 
-### Design iteration
+Design iteration:
 
 ```bash
 ./scripts/build-theme.sh
 ./scripts/audit-theme.sh
 ```
 
-### Live system repair without full apply
+Repair the live bar only:
 
 ```bash
 ./scripts/repair-waybar.sh
 ```
 
-### Full theme application
+Apply the theme:
 
 ```bash
 ./scripts/apply-theme.sh
 ```
 
-### Preview a full apply
+Apply the theme and ensure qbar is on:
 
 ```bash
-./scripts/apply-theme.sh --dry-run
+./scripts/apply-theme.sh --with-qbar
 ```
 
-### Apply with snapshots
+Toggle qbar without a full apply:
 
 ```bash
-./scripts/apply-theme.sh --with-backups
+./scripts/enable-qbar-safe.sh
+./scripts/disable-qbar-safe.sh
 ```
 
-## Current Operational Recommendation
+## qbar References
 
-Use:
+This theme consumes qbar's external contract. For qbar-side command and runtime details, see:
 
-- `repair-waybar.sh` when the issue is clearly Waybar state drift
-- `apply-theme.sh` when you want the whole theme refreshed
-
-Do not use `omarchy-refresh-waybar` as the primary repair command in this repository.
+- [qbar README](/home/othavio/Work/qbar/README.md)
+- [qbar commands](/home/othavio/Work/qbar/docs/commands.md)
+- [qbar runtime](/home/othavio/Work/qbar/docs/runtime.md)
+- [qbar Waybar contract](/home/othavio/Work/qbar/docs/waybar-contract.md)

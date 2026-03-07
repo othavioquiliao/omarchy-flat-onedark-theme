@@ -1,28 +1,16 @@
 # Omarchy Flat OneDark Theme
 
-Flat OneDark theme for Omarchy with a token-driven build pipeline, a minimal theme-owned Waybar color layer, and a dedicated Waybar repair workflow that avoids mutating `~/.local/share/omarchy`.
+`flat-onedark` is a token-driven Omarchy theme with a stock-safe Waybar model and an optional theme-owned `qbar` overlay.
 
-## Quick Start
+## Supported Flows
 
-Edit the source of truth:
-
-```bash
-theme.tokens.sh
-```
-
-Regenerate generated artifacts:
+Rebuild generated theme artifacts:
 
 ```bash
 ./scripts/build-theme.sh
 ```
 
-Audit file ownership and anti-drift rules:
-
-```bash
-./scripts/audit-theme.sh
-```
-
-Repair the local stock Waybar base:
+Repair the local stock-safe Waybar base:
 
 ```bash
 ./scripts/repair-waybar.sh
@@ -32,50 +20,47 @@ Apply the theme end to end:
 
 ```bash
 ./scripts/apply-theme.sh
+./scripts/apply-theme.sh --with-qbar
+./scripts/apply-theme.sh --without-qbar
 ```
 
-## Core Commands
-
-- `./scripts/build-theme.sh`
-  - rewrites generated repo-owned artifacts from `theme.tokens.sh`
-- `./scripts/audit-theme.sh`
-  - catches template shadowing, legacy Waybar layout files, and invalid Waybar ownership
-- `./scripts/repair-waybar.sh`
-  - rebuilds `~/.config/waybar/themes/omarchy-default` from Omarchy git `HEAD`
-- `./scripts/apply-theme.sh`
-  - builds, syncs the theme into Omarchy, repairs Waybar, then applies `flat-onedark`
-
-Useful apply flags:
+Enable or disable the optional qbar overlay directly:
 
 ```bash
-./scripts/apply-theme.sh --dry-run
-./scripts/apply-theme.sh --with-backups
-./scripts/apply-theme.sh --clean-backups
+./scripts/enable-qbar-safe.sh
+./scripts/disable-qbar-safe.sh
 ```
 
-## Operational Rules
+## Operating Model
 
-- `theme.tokens.sh` is the only edit point for palette and shared design tokens.
-- `waybar.css` is the only Waybar file published by this theme.
-- `qbar` is opt-in and must own its own Waybar integration through `qbar setup`.
-- This repo must not write into `~/.local/share/omarchy`.
-- If Waybar looks wrong after a reset or theme-manager action, use `./scripts/repair-waybar.sh`.
+- `theme.tokens.sh` is the only source of truth for palette and shared design tokens.
+- `waybar.css` is the theme-owned Waybar color layer.
+- The repaired stock snapshot in `~/.config/waybar/themes/omarchy-default/` stays qbar-free.
+- Live Waybar files are plain files rebuilt from that repaired snapshot.
+- The optional qbar overlay is theme-owned wiring applied on top of the live Waybar files.
+- `qbar` owns its runtime, settings, cache, and Waybar assets.
+- `qbar setup` is not the supported way to integrate qbar with this theme.
+- This repository must not write into `~/.local/share/omarchy`.
 
 ## Documentation
 
-Detailed project documentation lives in [docs/README.md](docs/README.md).
+Theme docs:
 
-That documentation is the canonical context set for:
+- [docs/README.md](docs/README.md)
+- [docs/qbar-integration.md](docs/qbar-integration.md)
+- [docs/build-and-apply.md](docs/build-and-apply.md)
+- [docs/troubleshooting.md](docs/troubleshooting.md)
 
-- human maintainers
-- future coding agents
-- debugging live Omarchy state
-- understanding ownership boundaries between this repo, Omarchy, qbar, and user-local config
+External qbar references used by this setup:
+
+- [qbar README](/home/othavio/Work/qbar/README.md)
+- [qbar commands](/home/othavio/Work/qbar/docs/commands.md)
+- [qbar runtime](/home/othavio/Work/qbar/docs/runtime.md)
+- [qbar Waybar contract](/home/othavio/Work/qbar/docs/waybar-contract.md)
 
 ## Included Assets
 
-- generated theme outputs such as `waybar.css`, `walker.css`, `gtk.css`, `hyprland.conf`, `starship.toml`, `qbar.css`, `steam.css`, `vencord.theme.css`, `neovim.lua`, `cava_theme`, `lazygit.yml`, `colors.toml`, `colors.fish`, and `fzf.fish`
-- static assets such as `backgrounds/`, `preview.png`, `icons.theme`, and `vscode.json`
+This repo ships generated theme outputs such as `waybar.css`, `walker.css`, `gtk.css`, `hyprland.conf`, `starship.toml`, `qbar.css`, `steam.css`, `vencord.theme.css`, `neovim.lua`, `cava_theme`, `lazygit.yml`, and static assets such as `backgrounds/`, `preview.png`, `icons.theme`, and `vscode.json`.
 
 ## Credits
 

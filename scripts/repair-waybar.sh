@@ -82,6 +82,32 @@ write_omarchy_head_file() {
   git -C "${OMARCHY_SOURCE_DIR}" show "HEAD:${source_path}" > "${target_path}"
 }
 
+replace_live_waybar_file() {
+  local source_path="$1"
+  local target_path="$2"
+
+  if [[ -L "${target_path}" ]] || [[ -d "${target_path}" ]]; then
+    run rm -rf "${target_path}"
+  fi
+
+  run cp -f "${source_path}" "${target_path}"
+}
+
+validate_repair() {
+  local snapshot_path="$1"
+  local live_path="$2"
+
+  if [[ -L "${live_path}" ]]; then
+    printf 'Waybar live file must not be a symlink after repair: %s\n' "${live_path}" >&2
+    exit 1
+  fi
+
+  if ! cmp -s "${snapshot_path}" "${live_path}"; then
+    printf 'Waybar live file does not match repaired snapshot: %s\n' "${live_path}" >&2
+    exit 1
+  fi
+}
+
 repair_waybar_base() {
   local local_waybar_dir="$HOME/.config/waybar"
   local local_waybar_theme_dir="${local_waybar_dir}/themes/omarchy-default"
@@ -97,8 +123,15 @@ repair_waybar_base() {
   write_omarchy_head_file "config/waybar/config.jsonc" "${local_waybar_theme_dir}/config.jsonc"
   write_omarchy_head_file "config/waybar/style.css" "${local_waybar_theme_dir}/style.css"
 
-  run ln -sfn "${local_waybar_theme_dir}/config.jsonc" "${local_waybar_dir}/config.jsonc"
-  run ln -sfn "${local_waybar_theme_dir}/style.css" "${local_waybar_dir}/style.css"
+  log "Writing live Waybar files as plain files"
+  replace_live_waybar_file "${local_waybar_theme_dir}/config.jsonc" "${local_waybar_dir}/config.jsonc"
+  replace_live_waybar_file "${local_waybar_theme_dir}/style.css" "${local_waybar_dir}/style.css"
+
+  if (( !DRY_RUN )); then
+    validate_repair "${local_waybar_theme_dir}/config.jsonc" "${local_waybar_dir}/config.jsonc"
+    validate_repair "${local_waybar_theme_dir}/style.css" "${local_waybar_dir}/style.css"
+    log "Validated repaired snapshot and live Waybar files"
+  fi
 }
 
 ensure_omarchy_repo

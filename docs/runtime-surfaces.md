@@ -2,88 +2,76 @@
 
 ## Purpose
 
-This document maps each meaningful theme surface from:
+This document maps repo files and external inputs to their runtime locations, owners, and apply paths.
 
-- repo file
-- to runtime file
-- to owner
-- to reload/apply path
+Use it to decide whether a problem belongs to:
 
-It is the canonical runtime map for this repository.
+- repo-generated theme output
+- Omarchy template output
+- repaired Waybar runtime state
+- theme-owned qbar overlay wiring
+- qbar-owned runtime or assets
 
 ## Core Surface Matrix
 
-| Surface | Repo file or source | Runtime file or path | Owner | Reload / apply | Notes |
+| Surface | Source | Runtime path | Owner | Apply path | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Waybar color layer | `waybar.css` | `~/.config/omarchy/current/theme/waybar.css` | Repo-generated | `omarchy-restart-waybar` | Colors only |
-| Waybar local stock config | Omarchy git `HEAD:config/waybar/config.jsonc` | `~/.config/waybar/themes/omarchy-default/config.jsonc` | Local repair flow | `scripts/repair-waybar.sh` | Not stored in repo |
-| Waybar local stock style | Omarchy git `HEAD:config/waybar/style.css` | `~/.config/waybar/themes/omarchy-default/style.css` | Local repair flow | `scripts/repair-waybar.sh` | Not stored in repo |
-| Waybar live config symlink | local repaired stock base | `~/.config/waybar/config.jsonc` | Local repair flow | `scripts/repair-waybar.sh` | Repointed by repair |
-| Waybar live style symlink | local repaired stock base | `~/.config/waybar/style.css` | Local repair flow | `scripts/repair-waybar.sh` | Repointed by repair |
-| qbar visual contract | `qbar.css` | `~/.config/omarchy/current/theme/qbar.css` | Repo-generated | qbar-specific integration only | Not auto-applied |
-| Walker CSS | `walker.css` | `~/.config/omarchy/current/theme/walker.css` | Repo-generated | `omarchy-restart-walker` | Imported by Omarchy walker theme |
-| Hyprland theme | `hyprland.conf` | `~/.config/omarchy/current/theme/hyprland.conf` | Repo-generated | `hyprctl reload` or `omarchy-theme-set` | Visual and rule layer |
-| GTK overrides | `gtk.css` | `~/.config/omarchy/current/theme/gtk.css` | Repo-generated | app restart or `omarchy-theme-set-gnome` side effects | GTK-facing color layer |
-| Starship | `starship.toml` | `~/.config/starship.toml` | Repo-generated | new shell | Synced explicitly by apply |
-| GNOME icon theme name | `icons.theme` | `~/.config/omarchy/current/theme/icons.theme` | Repo-static | `omarchy-theme-set-gnome` | Single theme name string |
-| VSCode/Codium/Cursor theme selector | `vscode.json` | `~/.config/omarchy/current/theme/vscode.json` | Repo-static | `omarchy-theme-set-vscode` | Static selector, not generated |
-| Steam variables | `steam.css` | `~/.config/omarchy/current/theme/steam.css` | Repo-generated | app restart | Generated CSS vars |
-| Vencord variables | `vencord.theme.css` | `~/.config/omarchy/current/theme/vencord.theme.css` | Repo-generated | app/theme reload | Generated CSS vars |
-| Neovim integration | `neovim.lua` | `~/.config/omarchy/current/theme/neovim.lua` | Repo-generated | reopen `nvim` | Generated plugin config |
-| Lazygit theme | `lazygit.yml` | `~/.config/omarchy/current/theme/lazygit.yml` | Repo-generated | reopen lazygit | Generated YAML |
-| Cava theme | `cava_theme` | `~/.config/omarchy/current/theme/cava_theme` | Repo-generated | reopen Cava | Generated color config |
+| Waybar color layer | `waybar.css` | `~/.config/omarchy/current/theme/waybar.css` | this repo | `omarchy-theme-set` / `omarchy-restart-waybar` | Colors only |
+| qbar visual contract | `qbar.css` | `~/.config/omarchy/current/theme/qbar.css` | this repo | imported only when overlay is enabled | Not part of stock-safe default |
+| Repaired stock config | Omarchy git `HEAD:config/waybar/config.jsonc` | `~/.config/waybar/themes/omarchy-default/config.jsonc` | repair flow | `./scripts/repair-waybar.sh` | qbar-free snapshot |
+| Repaired stock style | Omarchy git `HEAD:config/waybar/style.css` | `~/.config/waybar/themes/omarchy-default/style.css` | repair flow | `./scripts/repair-waybar.sh` | qbar-free snapshot |
+| Live Waybar config | repaired stock snapshot plus optional overlay composition | `~/.config/waybar/config.jsonc` | repair flow by default, theme overlay when enabled | `./scripts/repair-waybar.sh`, `./scripts/enable-qbar-safe.sh`, `./scripts/apply-theme.sh --with-qbar` | Plain file |
+| Live Waybar style | repaired stock snapshot plus optional overlay composition | `~/.config/waybar/style.css` | repair flow by default, theme overlay when enabled | `./scripts/repair-waybar.sh`, `./scripts/enable-qbar-safe.sh`, `./scripts/apply-theme.sh --with-qbar` | Plain file |
+| qbar overlay state | theme runtime state | `~/.config/waybar/.flat-onedark-qbar-overlay.json` | this theme | `enable-qbar-safe.sh`, `disable-qbar-safe.sh`, `apply-theme.sh` | Persists opt-in overlay state |
+| qbar Waybar assets | `qbar assets install` | `~/.config/waybar/qbar/*` | qbar | qbar CLI | Consumed by theme-owned overlay only |
+| qbar terminal helper | `qbar assets install` | `~/.config/waybar/scripts/qbar-open-terminal` | qbar | qbar CLI | Consumed by exported modules |
+| qbar settings | qbar runtime | `~/.config/qbar/settings.json` | qbar | qbar CLI / qbar TUI | Provider selection and order |
+| qbar cache | qbar runtime | `~/.cache/qbar/*` | qbar | qbar runtime | Not stored under Waybar anymore |
+| Walker CSS | `walker.css` | `~/.config/omarchy/current/theme/walker.css` | this repo | `omarchy-theme-set` / `omarchy-restart-walker` | Launcher layer |
+| Hyprland theme | `hyprland.conf` | `~/.config/omarchy/current/theme/hyprland.conf` | this repo | `omarchy-theme-set` / `hyprctl reload` | Visual config |
+| GTK layer | `gtk.css` | `~/.config/omarchy/current/theme/gtk.css` | this repo | `omarchy-theme-set` | App restart may still be needed |
+| Starship | `starship.toml` | `~/.config/starship.toml` | this repo | `./scripts/apply-theme.sh` | Synced directly |
 
-## Template-Driven Surface Matrix
+## Template-Driven Surfaces
 
-These runtime files are produced by Omarchy templates from `colors.toml`.
+These runtime files come from Omarchy templates driven by `colors.toml`:
 
-| Surface | Repo source | Runtime path | Reload / apply | Notes |
-| --- | --- | --- | --- | --- |
-| Alacritty theme | `colors.toml` | `~/.config/omarchy/current/theme/alacritty.toml` | `omarchy-restart-terminal` | Generated by `omarchy-theme-set-templates` |
-| Kitty theme | `colors.toml` | `~/.config/omarchy/current/theme/kitty.conf` | `omarchy-restart-terminal` | Generated by templates |
-| Ghostty theme | `colors.toml` | `~/.config/omarchy/current/theme/ghostty.conf` | `omarchy-restart-terminal` | Generated by templates |
-| Hyprlock theme | `colors.toml` | `~/.config/omarchy/current/theme/hyprlock.conf` | `hyprctl reload` or theme apply | Generated by templates |
-| SwayOSD theme | `colors.toml` | `~/.config/omarchy/current/theme/swayosd.css` | `omarchy-restart-swayosd` | Generated by templates |
-| Mako theme | `colors.toml` | `~/.config/omarchy/current/theme/mako.ini` | `omarchy-restart-mako` | Generated by templates |
-| btop theme | `colors.toml` | `~/.config/omarchy/current/theme/btop.theme` | `omarchy-restart-btop` | Generated by templates |
-| Browser policy color | `colors.toml` | `~/.config/omarchy/current/theme/chromium.theme` | `omarchy-theme-set-browser` or `omarchy-theme-set` | RGB string consumed by browser policy setup |
-| Obsidian CSS | `colors.toml` | `~/.config/omarchy/current/theme/obsidian.css` | `omarchy-theme-set-obsidian` or `omarchy-theme-set` | Generated by templates |
-| Keyboard RGB | `colors.toml` | `~/.config/omarchy/current/theme/keyboard.rgb` | `omarchy-theme-set-keyboard` or `omarchy-theme-set` | Generated by templates |
+| Surface | Runtime path |
+| --- | --- |
+| Alacritty | `~/.config/omarchy/current/theme/alacritty.toml` |
+| Kitty | `~/.config/omarchy/current/theme/kitty.conf` |
+| Ghostty | `~/.config/omarchy/current/theme/ghostty.conf` |
+| Hyprlock | `~/.config/omarchy/current/theme/hyprlock.conf` |
+| SwayOSD | `~/.config/omarchy/current/theme/swayosd.css` |
+| Mako | `~/.config/omarchy/current/theme/mako.ini` |
+| btop | `~/.config/omarchy/current/theme/btop.theme` |
+| Browser policy color | `~/.config/omarchy/current/theme/chromium.theme` |
+| Obsidian | `~/.config/omarchy/current/theme/obsidian.css` |
+| Keyboard RGB | `~/.config/omarchy/current/theme/keyboard.rgb` |
 
-## Shell and Prompt Surface Notes
+## qbar Contract Inputs
 
-### Fish
+The overlay helper consumes qbar through these public interfaces:
 
-- `colors.fish` is repo-generated and lives inside the current theme
-- it affects shell colors after a new shell starts
+- `qbar assets install --waybar-dir <path> --scripts-dir <path>`
+- `qbar export waybar-modules --qbar-bin <path> --terminal-script <path>`
+- `qbar export waybar-css --icons-dir <path>`
 
-### fzf
+Theme-side references:
 
-- `fzf.fish` is repo-generated and configures FZF color defaults
-- it applies when the shell loads it
+- [build-and-apply.md](./build-and-apply.md)
+- [qbar-integration.md](./qbar-integration.md)
 
-### Starship
+qbar-side references:
 
-- `starship.toml` is a special case because it is synced directly to `~/.config/starship.toml`
-- it is not applied through `~/.config/omarchy/current/theme`
-
-## GNOME and Browser Surface Notes
-
-### GNOME icon theme
-
-- `icons.theme` contains only the icon theme name
-- `omarchy-theme-set-gnome` reads it from the current theme
-- if the file is absent, Omarchy falls back to its own default icon theme behavior
-
-### Browser policy color
-
-- Chromium/Brave policy color is not read from CSS
-- Omarchy converts the RGB file in `chromium.theme` into a hex policy color
-- the browser policy path is therefore template-driven, not repo-owned
+- [qbar README](/home/othavio/Work/qbar/README.md)
+- [qbar commands](/home/othavio/Work/qbar/docs/commands.md)
+- [qbar runtime](/home/othavio/Work/qbar/docs/runtime.md)
+- [qbar Waybar contract](/home/othavio/Work/qbar/docs/waybar-contract.md)
 
 ## Waybar-Launched Tools
 
-Many UX issues that look like Waybar problems are actually problems in surfaces launched from Waybar.
+Some issues that look like Waybar problems are actually issues in tools launched from Waybar.
 
 | Waybar action | Actual surface |
 | --- | --- |
@@ -93,30 +81,13 @@ Many UX issues that look like Waybar problems are actually problems in surfaces 
 | `cpu` / process view | `btop` in the terminal |
 | `power` | Walker / Omarchy menu |
 
-Implication:
-
-- unreadable `wifi`, `bluetooth`, `audio`, or `btop` is usually an ANSI palette issue, not a Waybar CSS issue
-- unreadable power or Omarchy action menus is usually a Walker issue
-
-## Static Assets
-
-These are distributed with the theme but not applied as generated runtime configs:
-
-| Path | Role |
-| --- | --- |
-| `backgrounds/bg1.jpg` | wallpaper asset |
-| `backgrounds/bg2.png` | wallpaper asset |
-| `backgrounds/bg3.jpg` | wallpaper asset |
-| `preview.png` | preview image |
-
 ## Operational Summary
 
-If a surface is broken, identify its layer first:
+If a surface is broken, classify it first:
 
-1. repo-generated
-2. template-driven
-3. local repaired Waybar base
-4. qbar-owned
-5. terminal TUI launched by Waybar
-
-That classification determines the correct fix path.
+1. repo-generated theme output
+2. Omarchy template output
+3. repaired stock snapshot
+4. live Waybar overlay wiring
+5. qbar-owned runtime or assets
+6. TUI launched from Waybar

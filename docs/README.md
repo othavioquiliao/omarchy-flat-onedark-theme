@@ -1,13 +1,13 @@
 # Documentation Index
 
-This directory is the canonical context set for this theme.
+This directory is the canonical context set for the `flat-onedark` theme.
 
-Use these documents as the source of truth when:
+Use it as the source of truth for:
 
-- maintaining the repository
-- debugging a live Omarchy system
-- handing the theme to another developer
-- handing the theme to another coding agent
+- repository maintenance
+- live Omarchy debugging
+- Waybar repair and rollback
+- the supported qbar overlay workflow
 
 ## Read Order
 
@@ -16,44 +16,48 @@ Use these documents as the source of truth when:
 3. [build-and-apply.md](./build-and-apply.md)
 4. [runtime-surfaces.md](./runtime-surfaces.md)
 5. [waybar-repair.md](./waybar-repair.md)
-6. [troubleshooting.md](./troubleshooting.md)
+6. [qbar-integration.md](./qbar-integration.md)
+7. [troubleshooting.md](./troubleshooting.md)
 
-## What Each Document Covers
+## Document Map
 
 - `architecture.md`
-  - high-level design, source-of-truth model, generation flow, repo layout, and why Waybar is treated differently
+  - system model, stock-safe Waybar base, and optional qbar overlay
 - `file-ownership.md`
-  - who owns each file and runtime surface: this repo, Omarchy templates, local repaired state, qbar, or the user
+  - who writes each runtime surface and who must not
 - `build-and-apply.md`
-  - exact behavior of `build-theme.sh`, `audit-theme.sh`, `repair-waybar.sh`, and `apply-theme.sh`
+  - public scripts, flags, and the internal qbar overlay helper
 - `runtime-surfaces.md`
-  - detailed mapping from repo file to live runtime file and reload path
+  - repo-to-runtime path map, including qbar state and assets
 - `waybar-repair.md`
-  - the historical Waybar failure mode, the current repair model, and how to recover from drift
+  - why repair exists and how it relates to qbar overlay re-application
+- `qbar-integration.md`
+  - current supported qbar workflow for this theme
 - `troubleshooting.md`
-  - practical diagnosis and recovery procedures for the known failure modes
+  - operational diagnosis for repair, overlay, and runtime failures
 
 ## Fast Facts
 
 - `theme.tokens.sh` is the only source of truth for palette and shared design tokens.
-- `scripts/build-theme.sh` regenerates the repo-owned generated files.
-- `scripts/audit-theme.sh` enforces ownership and anti-drift rules.
-- `scripts/repair-waybar.sh` repairs the local stock Waybar base in `~/.config/waybar`.
-- `scripts/apply-theme.sh` is the end-to-end path for applying the theme.
-- This repository must not edit `~/.local/share/omarchy`.
-- `qbar` is not part of the default Waybar contract for this theme.
+- `./scripts/build-theme.sh` regenerates repo-owned outputs.
+- `./scripts/repair-waybar.sh` rebuilds the repaired stock snapshot and rewrites live Waybar files as plain files.
+- `./scripts/apply-theme.sh` is the full apply path.
+- `./scripts/enable-qbar-safe.sh` and `./scripts/disable-qbar-safe.sh` are the supported qbar overlay toggles.
+- `qbar` is optional and not part of the default stock-safe bar.
+- `qbar setup` is not the supported integration path for this theme.
 
-## Operational Principle
+## Integrated Setup
 
-The theme is intentionally split into three layers:
+This theme owns the live Waybar wiring for the optional qbar overlay. The qbar repo owns qbar runtime, provider state, cache, and Waybar assets.
 
-1. token source
-2. generated repo-owned artifacts
-3. Omarchy-generated template outputs plus repaired local runtime state
+External qbar references:
 
-That split is deliberate. Most historical bugs in this repo came from violating ownership boundaries, especially around Waybar.
+- [qbar README](/home/othavio/Work/qbar/README.md)
+- [qbar commands](/home/othavio/Work/qbar/docs/commands.md)
+- [qbar runtime](/home/othavio/Work/qbar/docs/runtime.md)
+- [qbar Waybar contract](/home/othavio/Work/qbar/docs/waybar-contract.md)
 
 ## Legacy Documents
 
-- [theme-color-map.md](./theme-color-map.md) is kept only as a compatibility entrypoint for older links.
-- `docs/plans/` contains historical planning documents and should not be treated as current operational truth.
+- [theme-color-map.md](./theme-color-map.md) is a legacy compatibility entrypoint.
+- `docs/plans/` contains historical planning documents, not current operational truth.
