@@ -15,7 +15,6 @@ repo_owned=(
   "walker.css"
   "hyprland.conf"
   "gtk.css"
-  "qbar.css"
   "vscode.json"
   "neovim.lua"
   "steam.css"
@@ -86,25 +85,11 @@ if [[ ! -x "${ROOT_DIR}/scripts/repair-waybar.sh" ]]; then
 fi
 printf '  - repair script exists and is executable\n'
 
-if [[ ! -x "${ROOT_DIR}/scripts/apply-qbar-overlay.sh" ]] || \
-   [[ ! -x "${ROOT_DIR}/scripts/enable-qbar-safe.sh" ]] || \
-   [[ ! -x "${ROOT_DIR}/scripts/disable-qbar-safe.sh" ]]; then
-  printf '  - invalid: qbar overlay scripts are missing or not executable\n' >&2
-  exit 3
-fi
-printf '  - qbar overlay scripts exist and are executable\n'
-
 if ! rg -n 'repair-waybar\.sh' "${ROOT_DIR}/scripts/apply-theme.sh" >/dev/null; then
   printf '  - invalid: scripts/apply-theme.sh no longer delegates to scripts/repair-waybar.sh\n' >&2
   exit 3
 fi
 printf '  - apply script delegates to repair-waybar.sh\n'
-
-if ! rg -n 'apply-qbar-overlay\.sh' "${ROOT_DIR}/scripts/apply-theme.sh" >/dev/null; then
-  printf '  - invalid: scripts/apply-theme.sh no longer knows how to re-apply the qbar overlay\n' >&2
-  exit 3
-fi
-printf '  - apply script can re-apply the optional qbar overlay\n'
 
 if rg -n 'ln -sfn' "${ROOT_DIR}/scripts/repair-waybar.sh" >/dev/null; then
   printf '  - invalid: repair script still recreates live Waybar symlinks\n' >&2
@@ -119,15 +104,6 @@ if rg -n '~/.local/share/omarchy/config/waybar|omarchy-refresh-waybar' \
   exit 3
 fi
 printf '  - Waybar scripts repair only ~/.config/waybar from Omarchy git HEAD\n'
-
-if rg -n '~/.config/waybar/themes/omarchy-default' \
-  "${ROOT_DIR}/scripts/apply-qbar-overlay.sh" \
-  "${ROOT_DIR}/scripts/enable-qbar-safe.sh" \
-  "${ROOT_DIR}/scripts/disable-qbar-safe.sh" >/dev/null; then
-  printf '  - invalid: qbar overlay scripts must not mutate the repaired stock snapshot\n' >&2
-  exit 3
-fi
-printf '  - qbar overlay scripts only touch live Waybar files and overlay state\n'
 
 if [[ "${shadow_count}" -ne 0 ]]; then
   printf '\nAudit failed: remove unintended shadowing files or declare them repo-owned.\n' >&2
