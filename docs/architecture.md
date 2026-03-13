@@ -9,13 +9,11 @@ It is responsible for:
 - a stable One Dark design system
 - generated theme artifacts from one token file
 - a deterministic Waybar repair workflow
-- an optional theme-owned qbar overlay on top of the repaired Waybar base
 
 It is not responsible for:
 
 - owning Omarchy itself
 - writing into `~/.local/share/omarchy`
-- delegating live Waybar wiring to qbar
 
 ## Design Principles
 
@@ -33,11 +31,7 @@ The repo mixes:
 
 ### Stock-safe by default
 
-The default Waybar contract is a repaired stock snapshot plus plain live files rebuilt from that snapshot. The repaired snapshot stays qbar-free.
-
-### Optional qbar overlay
-
-qbar is supported as an opt-in overlay. This repo owns the Waybar wiring for that overlay. qbar owns its executable, settings, cache, provider runtime, and Waybar assets.
+The default Waybar contract is a repaired stock snapshot plus plain live files rebuilt from that snapshot.
 
 ## System Model
 
@@ -63,7 +57,6 @@ Maintainers edit:
 - `gtk.css`
 - `hyprland.conf`
 - `starship.toml`
-- `qbar.css`
 - `steam.css`
 - `vencord.theme.css`
 - `neovim.lua`
@@ -111,30 +104,8 @@ The supported model is:
 
 1. rebuild a repaired stock snapshot from Omarchy git `HEAD`
 2. rewrite live Waybar files as plain files from that snapshot
-3. keep the snapshot qbar-free
-4. optionally compose the qbar overlay only into the live Waybar files
 
-That split keeps the default bar repairable and the qbar overlay reversible.
-
-## qbar Model
-
-`qbar.css` is part of the current supported integration contract, but it is only imported when the optional overlay is enabled.
-
-This theme owns:
-
-- overlay enable and disable
-- overlay persistence state
-- live Waybar composition
-
-qbar owns:
-
-- the `qbar` executable
-- `~/.config/qbar/*`
-- `~/.cache/qbar/*`
-- `~/.config/waybar/qbar/*`
-- `~/.config/waybar/scripts/qbar-open-terminal`
-
-See [qbar-integration.md](./qbar-integration.md) for the operational contract and external qbar references such as [qbar README](/home/othavio/Work/qbar/README.md) and [qbar Waybar contract](/home/othavio/Work/qbar/docs/waybar-contract.md).
+That split keeps the default bar repairable and deterministic.
 
 ## Repository Layout
 
@@ -143,9 +114,8 @@ See [qbar-integration.md](./qbar-integration.md) for the operational contract an
 | `README.md` | Short operator-facing entrypoint |
 | `docs/` | Canonical operational documentation |
 | `theme.tokens.sh` | Authoritative design tokens |
-| `scripts/` | Build, audit, repair, apply, and overlay entrypoints |
+| `scripts/` | Build, audit, repair, and apply entrypoints |
 | `waybar.css` | Theme-owned Waybar color layer |
-| `qbar.css` | Theme-owned visual contract for the optional qbar overlay |
 | `walker.css` | Generated Walker styling |
 | `gtk.css` | Generated GTK layer |
 | `hyprland.conf` | Generated Hyprland visual config |
