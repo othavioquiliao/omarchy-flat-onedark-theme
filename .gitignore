@@ -1,0 +1,5 @@
+# Python virtual environment
+.venv/
+
+# Backup files gerados por apply-theme.sh e repair-waybar.sh
+*.bak.*
