@@ -26,8 +26,6 @@ from Omarchy git `HEAD`, then rewrites:
 
 as plain files from that repaired stock snapshot.
 
-The repaired snapshot remains qbar-free.
-
 ## Script Behavior
 
 `./scripts/repair-waybar.sh`:
@@ -48,28 +46,6 @@ Flags:
 `./scripts/apply-theme.sh` always runs `./scripts/repair-waybar.sh --no-restart` before `omarchy-theme-set`.
 
 That keeps theme apply deterministic even when the local Omarchy working tree is dirty.
-
-If the persisted qbar overlay state is enabled, `apply-theme.sh` re-applies the optional overlay after the theme apply step.
-
-## Relationship to qbar
-
-Repair restores the stock-safe bar. It does not uninstall qbar and it does not purge qbar-owned assets.
-
-Repair intentionally does not:
-
-- add qbar modules
-- import `qbar.css`
-- write qbar assets
-- change `~/.config/qbar/*`
-- change `~/.cache/qbar/*`
-
-If you run repair while qbar was enabled, the live bar returns to stock-safe until you:
-
-- run `./scripts/enable-qbar-safe.sh`, or
-- run `./scripts/apply-theme.sh --with-qbar`, or
-- run `./scripts/apply-theme.sh` with an enabled overlay state file already present
-
-See [qbar-integration.md](./qbar-integration.md) for the supported overlay flow and [qbar README](/home/othavio/Work/qbar/README.md) for qbar-owned runtime details.
 
 ## Relationship to `theme-manager` and `omarchy-refresh-waybar`
 
@@ -92,6 +68,4 @@ If Waybar regresses, check this order before changing theme tokens or CSS:
 
 1. does the repaired stock snapshot exist
 2. are live Waybar files regular plain files
-3. is the overlay state file enabled
-4. were qbar assets or exports removed
-5. did a reset path overwrite the repaired snapshot
+3. did a reset path overwrite the repaired snapshot
